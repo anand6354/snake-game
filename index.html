@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game - Eat Other Snakes</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Main Menu -->
+        <div id="mainMenu" class="menu active">
+            <div class="menu-content">
+                <h1>🐍 SNAKE GAME</h1>
+                <p class="subtitle">Eat Other Snakes and Grow Bigger!</p>
+                
+                <div class="menu-buttons">
+                    <button class="btn btn-primary" onclick="startGame('survival')">Survival Mode</button>
+                    <button class="btn btn-primary" onclick="startGame('timed')">Time Attack (60s)</button>
+                    <button class="btn btn-primary" onclick="startGame('tournament')">Tournament Mode</button>
+                    <button class="btn btn-secondary" onclick="showSettings()">⚙️ Settings</button>
+                    <button class="btn btn-secondary" onclick="showInstructions()">📖 Instructions</button>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">High Score:</span>
+                        <span class="stat-value" id="highScore">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-screen">
+            <div class="game-header">
+                <div class="score-box">
+                    <span class="label">Score:</span>
+                    <span class="value" id="score">0</span>
+                </div>
+                <div class="timer-box" id="timerBox" style="display: none;">
+                    <span class="label">Time:</span>
+                    <span class="value" id="timer">60</span>
+                </div>
+                <div class="snake-size-box">
+                    <span class="label">Size:</span>
+                    <span class="value" id="snakeSize">1</span>
+                </div>
+                <button class="btn-pause" onclick="togglePause()">⏸ Pause</button>
+            </div>
+
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+            <!-- Pause Menu -->
+            <div id="pauseMenu" class="overlay-menu">
+                <div class="menu-content">
+                    <h2>PAUSED</h2>
+                    <button class="btn btn-primary" onclick="togglePause()">Resume Game</button>
+                    <button class="btn btn-primary" onclick="endGame()">Exit to Menu</button>
+                </div>
+            </div>
+
+            <!-- Game Over Menu -->
+            <div id="gameOverMenu" class="overlay-menu">
+                <div class="menu-content">
+                    <h2>GAME OVER!</h2>
+                    <div class="game-stats">
+                        <p>Final Score: <span id="finalScore">0</span></p>
+                        <p>Snakes Eaten: <span id="snakesEaten">0</span></p>
+                        <p>Final Size: <span id="finalSize">0</span></p>
+                        <p>Time Survived: <span id="timeSurvived">0</span>s</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="startGame(currentGameMode)">Play Again</button>
+                    <button class="btn btn-primary" onclick="endGame()">Back to Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Menu -->
+        <div id="settingsMenu" class="menu">
+            <div class="menu-content">
+                <h2>Settings</h2>
+                
+                <div class="settings-group">
+                    <label>Difficulty Level:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="difficulty" value="easy" checked onchange="changeDifficulty('easy')"> Easy</label>
+                        <label><input type="radio" name="difficulty" value="normal" onchange="changeDifficulty('normal')"> Normal</label>
+                        <label><input type="radio" name="difficulty" value="hard" onchange="changeDifficulty('hard')"> Hard</label>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>Master Volume:</label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="70" onchange="changeVolume(this.value)">
+                    <span id="volumeValue">70%</span>
+                </div>
+
+                <div class="settings-group">
+                    <label>Game Speed:</label>
+                    <input type="range" id="speedSlider" min="50" max="150" value="100" onchange="changeSpeed(this.value)">
+                    <span id="speedValue">100%</span>
+                </div>
+
+                <div class="settings-group">
+                    <label>Number of AI Snakes:</label>
+                    <input type="range" id="snakesSlider" min="1" max="10" value="5" onchange="changeSnakeCount(this.value)">
+                    <span id="snakesValue">5</span>
+                </div>
+
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="soundToggle" checked onchange="toggleSound()"> Enable Sound</label>
+                    <label><input type="checkbox" id="particlesToggle" checked onchange="toggleParticles()"> Enable Particles</label>
+                </div>
+
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                <button class="btn btn-secondary" onclick="backToMenu()">Back</button>
+            </div>
+        </div>
+
+        <!-- Instructions Menu -->
+        <div id="instructionsMenu" class="menu">
+            <div class="menu-content instructions-content">
+                <h2>How to Play</h2>
+                
+                <div class="instruction-section">
+                    <h3>Objective</h3>
+                    <p>Guide your snake to eat other snakes and grow as large as possible!</p>
+                </div>
+
+                <div class="instruction-section">
+                    <h3>Controls</h3>
+                    <ul>
+                        <li><strong>Arrow Keys / WASD:</strong> Move your snake</li>
+                        <li><strong>Space:</strong> Speed boost (limited)</li>
+                        <li><strong>P:</strong> Pause/Resume</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section">
+                    <h3>Game Modes</h3>
+                    <ul>
+                        <li><strong>Survival Mode:</strong> Last as long as possible</li>
+                        <li><strong>Time Attack:</strong> Get the biggest score in 60 seconds</li>
+                        <li><strong>Tournament:</strong> 3 rounds, best score wins</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section">
+                    <h3>Power-ups</h3>
+                    <ul>
+                        <li><span class="power-up gold">⭐</span> <strong>Speed Boost:</strong> Temporary increased speed</li>
+                        <li><span class="power-up blue">🛡️</span> <strong>Shield:</strong> Protection from one collision</li>
+                        <li><span class="power-up purple">❄️</span> <strong>Freeze:</strong> Slow other snakes</li>
+                        <li><span class="power-up green">📉</span> <strong>Shrink:</strong> Temporarily reduce your size</li>
+                    </ul>
+                </div>
+
+                <button class="btn btn-primary" onclick="backToMenu()">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
